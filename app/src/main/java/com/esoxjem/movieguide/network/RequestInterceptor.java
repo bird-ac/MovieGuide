@@ -1,6 +1,7 @@
 package com.esoxjem.movieguide.network;
 
 import com.esoxjem.movieguide.BuildConfig;
+import com.esoxjem.movieguide.safevault.SafeVault;
 
 import java.io.IOException;
 
@@ -29,7 +30,7 @@ public class RequestInterceptor implements Interceptor {
         HttpUrl originalHttpUrl = original.url();
 
         HttpUrl url = originalHttpUrl.newBuilder()
-                .addQueryParameter("api_key", BuildConfig.TMDB_API_KEY)
+                .addQueryParameter("api_key", SafeVault.getInstance().getApiKey())
                 .build();
 
         Request request = original.newBuilder().url(url).build();

@@ -2,6 +2,7 @@ package com.esoxjem.movieguide.network;
 
 
 import com.esoxjem.movieguide.BuildConfig;
+import com.esoxjem.movieguide.safevault.SafeVault;
 
 import java.util.concurrent.TimeUnit;
 
@@ -9,6 +10,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import okhttp3.CertificatePinner;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -32,9 +34,19 @@ public class NetworkModule {
 
     @Provides
     @Singleton
-    OkHttpClient provideOkHttpClient(RequestInterceptor requestInterceptor) {
+    CertificatePinner provideCertificatePinner() {
+        String hostname = "*.themoviedb.org";
+        return new CertificatePinner.Builder()
+                .add(hostname, SafeVault.getInstance().getSslSha())
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    OkHttpClient provideOkHttpClient(RequestInterceptor requestInterceptor, CertificatePinner certificatePinner) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(CONNECT_TIMEOUT_IN_MS, TimeUnit.MILLISECONDS)
+                .certificatePinner(certificatePinner)
                 .addInterceptor(requestInterceptor);
 
         if (BuildConfig.DEBUG) {

@@ -1,11 +1,15 @@
 package com.esoxjem.movieguide.listing;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -17,8 +21,10 @@ import com.esoxjem.movieguide.Movie;
 import com.esoxjem.movieguide.R;
 import com.esoxjem.movieguide.details.MovieDetailsActivity;
 import com.esoxjem.movieguide.details.MovieDetailsFragment;
+import com.esoxjem.movieguide.util.DebugDetector;
 import com.esoxjem.movieguide.util.EspressoIdlingResource;
 import com.esoxjem.movieguide.util.RxUtils;
+import com.esoxjem.movieguide.util.SignatureHelper;
 import com.jakewharton.rxbinding2.support.v7.widget.RxSearchView;
 
 import java.util.concurrent.TimeUnit;
@@ -48,6 +54,20 @@ public class MoviesListingActivity extends AppCompatActivity implements MoviesLi
         } else {
             twoPaneMode = false;
         }
+
+        DebugDetector detector = new DebugDetector();
+        if (detector.isDebuggable(getApplicationContext())||detector.detectDebugger()) {
+            Log.e("MovieListingActivity","Closing Debug are not allowed");
+            finishAffinity();
+        }
+
+        SignatureHelper sh = new SignatureHelper();
+        if(sh.isSignatureMatched(this) != SignatureHelper.CODE_SIGNATURE_MATCHING_VALID) {
+            Log.e("MoviesListingActivity", "Certificate not valid");
+            Toast.makeText(getApplicationContext(),"Certificate not valid",Toast.LENGTH_SHORT).show();
+            finishAffinity();
+        }
+
     }
 
     private void setToolbar() {
